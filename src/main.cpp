@@ -1,29 +1,18 @@
 #include <gtest/gtest.h>
+#include <Soundex.h>
 
-class Soundex
+class SoundexEncoding : public testing::Test
 {
-private:
-    auto zeroPad(const std::string&input) const
-    {
-        return input + "000";
-    }
-public:
-    auto encode(const std::string &input) const
-    {
-        return zeroPad(input);
-    }
+    public:
+        Soundex soundex;
 };
 
-TEST(SoundexEncoding, RetainsSoleLetterOfOneLetterWord)
+TEST_F(SoundexEncoding, RetainsSoleLetterOfOneLetterWord)
 {
-    Soundex soundex;
-    auto encoded = soundex.encode("A");
-    ASSERT_EQ(encoded, "A000");
+    ASSERT_EQ(soundex.encode("A"), "A000");
 }
 
-TEST(SoundexEncoding, PadsWithZerosToEnsureThreeDigits)
+TEST_F(SoundexEncoding, PadsWithZerosToEnsureThreeDigits)
 {
-    Soundex soundex;
-    auto encoded = soundex.encode("|");
-    ASSERT_STREQ(encoded.c_str(), "|000");
+    ASSERT_EQ(soundex.encode("|"), "|000");
 }
