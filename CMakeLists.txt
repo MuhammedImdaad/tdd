@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.28)
 project(YourProjectName)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Fetch and add GoogleTest
@@ -16,10 +16,10 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 # Add a single file where tests and code are together
-add_executable(UnitTests src/main.cpp)
+add_executable(unitTest src/main.cpp)
 
-target_link_libraries(UnitTests gtest gtest_main)
+target_link_libraries(unitTest gtest gtest_main)
 
 # Discover and run tests
 include(GoogleTest)
-gtest_discover_tests(UnitTests)
+gtest_discover_tests(unitTest)
