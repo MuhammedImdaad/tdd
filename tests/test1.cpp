@@ -6,8 +6,8 @@
  */
 class SoundexEncoding : public testing::Test
 {
-    public:
-        Soundex soundex;
+public:
+    Soundex soundex;
 };
 
 TEST_F(SoundexEncoding, RetainsSoleLetterOfOneLetterWord)
@@ -42,7 +42,7 @@ TEST_F(SoundexEncoding, LimitsLengthToFourCharacters)
 
 TEST_F(SoundexEncoding, IgnoresVowelLikeLetters)
 {
-    ASSERT_EQ(soundex.encode("Baeiouhycdl"), "B234");
+    ASSERT_EQ(soundex.encode("BaAeEiIoOuUhHyYcdl"), "B234");
 }
 
 TEST_F(SoundexEncoding, CombinesDuplicateEncodings)
@@ -51,4 +51,24 @@ TEST_F(SoundexEncoding, CombinesDuplicateEncodings)
     ASSERT_EQ(soundex.encodedDigit('c'), soundex.encodedDigit('g'));
     ASSERT_EQ(soundex.encodedDigit('d'), soundex.encodedDigit('t'));
     ASSERT_EQ(soundex.encode("Abfcgdt"), "A123");
+}
+
+TEST_F(SoundexEncoding, UppercasesFirstLetter)
+{
+    ASSERT_EQ(soundex.encode("abcd").front(), 'A');
+}
+
+TEST_F(SoundexEncoding, IgnoresCaseWhenEncodingConsonants)
+{
+    ASSERT_EQ(soundex.encode("BCDL"), soundex.encode("bcdl"));
+}
+
+TEST_F(SoundexEncoding, CombinesDuplicateCodesWhen2ndLetterDuplicates1st)
+{
+    ASSERT_EQ(soundex.encode("Bbcd"), "B230");
+}
+
+TEST_F(SoundexEncoding, DoesNotCombineDuplicateEncodingsSeparatedByVowels)
+{
+    ASSERT_EQ(soundex.encode("Jbob"), "J110");
 }
