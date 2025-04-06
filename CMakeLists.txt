@@ -15,7 +15,7 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-add_executable(unitTest tests/test1.cpp)
+add_executable(unitTest tests/test2.cpp)
 
 target_include_directories(unitTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 

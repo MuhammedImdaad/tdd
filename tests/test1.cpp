@@ -4,14 +4,15 @@
 /*
  @brief A test fixture class for Soundex encoding tests.
  Google Mock instantiates the fixture class ​once per test​.
+ a class that provides support for cross-test reuse.
  */
 class SoundexEncoding : public testing::Test
-{ 
+{
 public:
     Soundex soundex;
 };
 
-TEST_F(SoundexEncoding, RetainsSoleLetterOfOneLetterWord)
+TEST_F(SoundexEncoding, RetainsSoleLetterOfOneLetterWord) // test case name followed by test within the test case
 {
     ASSERT_EQ(soundex.encode("A"), "A000");
 }
@@ -69,7 +70,7 @@ TEST_F(SoundexEncoding, CombinesDuplicateCodesWhen2ndLetterDuplicates1st)
     ASSERT_EQ(soundex.encode("Bbcd"), "B230");
 }
 
-TEST_F(SoundexEncoding, DISABLED_DoesNotCombineDuplicateEncodingsSeparatedByVowels)
+TEST_F(SoundexEncoding, DoesNotCombineDuplicateEncodingsSeparatedByVowels)
 {
     ASSERT_EQ(soundex.encode("Jbob"), "J110");
 }
