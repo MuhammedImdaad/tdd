@@ -1,4 +1,7 @@
 cmake_minimum_required(VERSION 3.28)
+
+set(CMAKE_TOOLCHAIN_FILE "/home/user/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
+
 project(YourProjectName)
 
 set(CMAKE_CXX_STANDARD 14)
@@ -15,11 +18,13 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-add_executable(unitTest tests/test2.cpp)
+add_executable(unitTest tests/test3.cpp)
 
 target_include_directories(unitTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-target_link_libraries(unitTest GTest::gtest_main)
+find_package(nlohmann_json CONFIG REQUIRED)
+
+target_link_libraries(unitTest GTest::gtest_main nlohmann_json::nlohmann_json)
 
 # Discover and run tests
 include(GoogleTest)
