@@ -6,6 +6,7 @@ class PlaceDescriptionService
     Http *http;
 
 public:
+
     PlaceDescriptionService(Http *http)
         : http(http)
     {
@@ -38,12 +39,14 @@ public:
     std::string summaryDescription(
         const std::string &response) const
     {
+        std::cout << "Debug\t: " << response << std::endl;
         AddressExtractor extractor;
         auto address = extractor.addressFrom(response);
         return address.road + ", " + address.city + ", " +
                address.state + ", " + address.country;
     }
 
+    // primary method to be tested
     std::string summaryDescription(
         const std::string &latitude,
         const std::string &longitude) const
