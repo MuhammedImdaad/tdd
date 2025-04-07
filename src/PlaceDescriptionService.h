@@ -10,6 +10,7 @@ public:
     PlaceDescriptionService(Http *http)
         : http(http)
     {
+        http->initialize();
     }
 
     std::string keyValue(
@@ -39,7 +40,7 @@ public:
     std::string summaryDescription(
         const std::string &response) const
     {
-        std::cout << "Debug\t: " << response << std::endl;
+        // std::cout << "Debug\t: " << response << std::endl;
         AddressExtractor extractor;
         auto address = extractor.addressFrom(response);
         return address.road + ", " + address.city + ", " +
@@ -53,6 +54,6 @@ public:
     {
         auto request = createGetRequestUrl(latitude, longitude);
         auto response = http->get(request);
-        return summaryDescription(response);
+        return response.empty() ? "" : summaryDescription(response);
     }
 };

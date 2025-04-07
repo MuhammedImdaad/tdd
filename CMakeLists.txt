@@ -18,13 +18,13 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-add_executable(unitTest tests/test3.cpp)
+add_executable(unitTest tests/test4.cpp)
 
 target_include_directories(unitTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 find_package(nlohmann_json CONFIG REQUIRED)
 
-target_link_libraries(unitTest GTest::gtest_main nlohmann_json::nlohmann_json)
+target_link_libraries(unitTest GTest::gtest_main GTest::gmock_main nlohmann_json::nlohmann_json)
 
 # Discover and run tests
 include(GoogleTest)
