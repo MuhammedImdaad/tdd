@@ -13,3 +13,14 @@ in google mock, Where’s the assertion? Google Mock does its verification when 
 Google Mock doesn’t concern itself with verifying the order in which expectations are met. If you’re concerned about order, you can tell Google Mock (and many other C++ mocking tools) to verify it. 
 
 Just because you can doesn’t necessarily mean you should, though. Most of the time, the basic Google Mock mechanisms you learned earlier will suffice. When test-driving, if you find yourself seeking esoteric mock tool features frequently, stop and take a look at your design. Are you testing a method that’s doing too much? Can you restructure your design in a manner so that you don’t need such complex mocking? More often than not, you can.
+
+You have two jobs when introducing a test double. First, code the test double. Second, get the target to use an instance of it. Certain techniques for doing so are known as​ dependency injection​(DI). Do not use setter or constructor injection to avoid clients take on the responsibility of creating Http objects and passing them in (to make it private). 
+
+* via a constructor
+* using a setter member function
+* Override Factory Method
+* Override Getter Method
+* Introduce via Template Parameter
+* Injection Tools
+
+Your first reaction to test doubles may be that using them will change your approach to design. however your code will look better, because you will seek cohesive, decoupled designs as you practice TDD. Test doubles are like any tool; the bigger challenge is not in learning how to use them but in knowing when to use them. At some point, you or someone else will implement the collaborator. You have a choice: remove the mocks so that the code under test uses the production collaborator or keep the mocks in place. therefore use Test Doubles Wisely.
