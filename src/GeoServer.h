@@ -11,6 +11,8 @@
 #include <ThreadPool.h>
 
 class GeoServerListner;
+// The GeoServer provides support for client applications seeking 
+// to track the geographic location of large numbers of users 
 class GeoServer
 {
     std::map<std::string, Location> users;

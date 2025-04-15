@@ -33,6 +33,9 @@ Location GeoServer::locationOf(const std::string &name) const
     return Location{};
 }
 
+/*As a client user, I want to frequently request a list of all other users 
+(along with their geographic coordinates) whose current position lies within 
+a rectangular map area so that I can represent their positions on a map.*/
 void GeoServer::usersInBox(
     const std::string &user, double widthInMeters, double heightInMeters,
     const std::shared_ptr<GeoServerListner> &listner) const

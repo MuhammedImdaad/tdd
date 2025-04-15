@@ -197,6 +197,17 @@ TEST_F(AGeoServer_UsersInBox, HandlesLargeNumbersOfUsers)
     ASSERT_EQ(lots, std::static_pointer_cast<GeoServerUserTrackingListener>(trackingListener)->trackedUsers.size());
 }
 
+/*
+Do we need to write a test that interacts with a multithreaded pool?
+For purposes of test-driving or plain ol’ unit testing, ​no!​
+We’ve demonstrated that a ThreadPool can take on work and dispatch it to different threads.
+We’ve demonstrated that the GeoServer logic to determine the users within a rectangle works correctly.
+And we’ve demonstrated that the GeoServer logic sends the work to the ThreadPool.
+
+Any further test would be of another sort, and thus we write it only if we need it.
+Since our interest in using threading was to determine
+whether we could get immediate response from​usersInBox​and have locations returned asynchronously,
+we ​do​ want a test.*/
 class AGeoServer_ScaleTests : public AGeoServer_UsersInBox
 {
 public:
