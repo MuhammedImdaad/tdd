@@ -1,4 +1,5 @@
 #include <GeoServer.h>
+#include <iostream>
 
 void GeoServer::track(const std::string &name)
 {
@@ -34,19 +35,21 @@ Location GeoServer::locationOf(const std::string &name) const
 
 void GeoServer::usersInBox(
     const std::string &user, double widthInMeters, double heightInMeters,
-    GeoServerListner &listner) const
+    const std::shared_ptr<GeoServerListner> &listner) const
 {
     auto location = locationOf(user);
     Area box{location, widthInMeters, heightInMeters};
 
-    // std::vector<User> tracked;
     for (auto &each : users)
-        if (isDifferentUserInBounds(each, user, box))
-        {
-            // tracked.push_back(User{each.first, each.second});
-            listner.updated({each.first, each.second});
-        }
-    // return tracked;
+    {
+        Work work([=]()
+                  {
+            if (isDifferentUserInBounds(each, user, box))
+            {
+                listner->updated({each.first, each.second});
+            } });
+        pool->add(work);
+    }
 }
 
 bool GeoServer::isDifferentUserInBounds(

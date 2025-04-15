@@ -3,15 +3,18 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <memory>
 
 #include <Location.h>
 #include <User.h>
 #include <Area.h>
+#include <ThreadPool.h>
 
 class GeoServerListner;
 class GeoServer
 {
     std::map<std::string, Location> users;
+    std::unique_ptr<ThreadPool> pool;
 
 public:
     void track(const std::string &name);
@@ -21,12 +24,23 @@ public:
     void updateLocation(const std::string &name, const Location &location);
 
     void usersInBox(
-        const std::string &user, double widthInMeters, double heightInMeters, GeoServerListner& ) const;
+        const std::string &user, double widthInMeters, double heightInMeters, 
+        const std::shared_ptr<GeoServerListner>& listner) const;
 
     bool isDifferentUserInBounds(
         const std::pair<std::string, Location> &each,
         const std::string &user,
         const Area &box) const;
+
+    void useThreadPool(std::unique_ptr<ThreadPool>& pool)
+    {
+        this->pool = std::move(pool);
+    }
+
+    void startThreads(unsigned int numberOfThreads)
+    {
+        pool->start(numberOfThreads);
+    }
 };
 
 class GeoServerListner

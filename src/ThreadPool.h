@@ -2,6 +2,9 @@
 #include <queue>
 #include <Work.h>
 #include <thread>
+#include <atomic>
+#include <mutex>
+#include <iostream>
 
 class ThreadPool
 {
@@ -34,7 +37,8 @@ public:
         std::lock_guard<std::mutex> lock(m);
         return !q.empty();
     }
-    void add(Work w)
+
+    virtual void add(Work w)
     {
         std::lock_guard<std::mutex> lock(m);
         q.push(w);
@@ -43,6 +47,7 @@ public:
     Work pullWork()
     {
         std::lock_guard<std::mutex> lock(m);
+
         if (q.empty())
             return Work{};
 

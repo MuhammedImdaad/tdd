@@ -40,7 +40,6 @@ public:
     std::string summaryDescription(
         const std::string &response) const
     {
-        // std::cout << "Debug\t: " << response << std::endl;
         AddressExtractor extractor;
         auto address = extractor.addressFrom(response);
         return address.road + ", " + address.city + ", " +

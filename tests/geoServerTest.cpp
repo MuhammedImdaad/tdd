@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include <GeoServer.h>
 #include <Location.h>
+#include <ThreadPool.h>
+#include <future>
 
 using namespace testing;
 
@@ -103,20 +105,19 @@ public:
 
     Location aUserLocation{38, -103};
 
-    void SetUp() override
+    virtual void SetUp() override
     {
+        pool = std::make_unique<SingleThreadedPool>();
+        server.useThreadPool(pool);
+        trackingListener = std::make_shared<GeoServerUserTrackingListener>();
         server.track(aUser);
-
         server.track(bUser);
-
         server.track(cUser);
-
         server.updateLocation(aUser, aUserLocation);
     }
 
     std::vector<std::string> UserNames(const std::vector<User> &users)
     {
-
         std::vector<std::string> result;
         for (const auto &each : users)
         {
@@ -125,29 +126,54 @@ public:
         return result;
     }
 
+    void addUsersAt(unsigned int number, const Location &location)
+    {
+        for (unsigned int i{0}; i < number; i++)
+        {
+            std::string user{"user" + std::to_string(i)};
+            server.track(user);
+            server.updateLocation(user, location);
+        }
+    }
+
     class GeoServerUserTrackingListener : public GeoServerListner
     {
     public:
         std::vector<User> trackedUsers;
-        virtual void updated(const User &user)
+        virtual void updated(const User &user) override
         {
             trackedUsers.push_back(user);
         }
-    } trackingListener;
+    };
+
+    class SingleThreadedPool : public ThreadPool
+    {
+    public:
+        virtual void add(Work w) override
+        {
+            w.execute();
+        }
+    };
+
+    std::unique_ptr<ThreadPool> pool;
+    std::shared_ptr<GeoServerListner> trackingListener;
 };
 
 TEST_F(AGeoServer_UsersInBox, AnswersUsersInSpecifiedRange)
 {
+    server.startThreads(0);
+
     server.updateLocation(
         bUser, Location{aUserLocation.go(Width / 2 - TenMeters, East)});
     server.usersInBox(aUser, Width, Height, trackingListener);
 
-    ASSERT_EQ(std::vector<std::string>{bUser}, UserNames(trackingListener.trackedUsers));
+    ASSERT_EQ(std::vector<std::string>{bUser}, UserNames(std::static_pointer_cast<GeoServerUserTrackingListener>(trackingListener)->trackedUsers));
 }
-
 
 TEST_F(AGeoServer_UsersInBox, AnswersOnlyUsersWithinSpecifiedRange)
 {
+    server.startThreads(0);
+
     server.updateLocation(
         bUser, Location{aUserLocation.go(Width / 2 + TenMeters, East)});
 
@@ -156,21 +182,79 @@ TEST_F(AGeoServer_UsersInBox, AnswersOnlyUsersWithinSpecifiedRange)
 
     server.usersInBox(aUser, Width, Height, trackingListener);
 
-    ASSERT_EQ(std::vector<std::string>{cUser}, UserNames(trackingListener.trackedUsers));
+    ASSERT_EQ(std::vector<std::string>{cUser}, UserNames(std::static_pointer_cast<GeoServerUserTrackingListener>(trackingListener)->trackedUsers));
 }
 
 TEST_F(AGeoServer_UsersInBox, HandlesLargeNumbersOfUsers)
 {
-    Location anotherLocation{aUserLocation.go(10, West)};
-    const unsigned int lots{500000};
+    server.startThreads(0);
 
-    for (unsigned int i{0}; i < lots; i++)
-    {
-        std::string user{"user" + std::to_string(i)};
-        server.track(user);
-        server.updateLocation(user, anotherLocation);
-    }
+    const unsigned int lots{500000};
+    addUsersAt(lots, Location{aUserLocation.go(TenMeters, West)});
 
     server.usersInBox(aUser, Width, Height, trackingListener);
-    ASSERT_EQ(lots, trackingListener.trackedUsers.size());
+
+    ASSERT_EQ(lots, std::static_pointer_cast<GeoServerUserTrackingListener>(trackingListener)->trackedUsers.size());
+}
+
+class AGeoServer_ScaleTests : public AGeoServer_UsersInBox
+{
+public:
+    virtual void SetUp() override
+    {
+        pool = std::make_unique<ThreadPool>();
+        trackingListener = std::make_shared<GeoServerScaleListener>();
+        server.useThreadPool(pool);
+        server.track(aUser);
+        server.updateLocation(aUser, aUserLocation);
+    }
+
+    class GeoServerScaleListener : public GeoServerListner
+    {
+        std::mutex m;
+        unsigned int count{0}; // to check if work actually gets executed
+        std::condition_variable wasExecuted;
+
+        void incrementCountAndNotify()
+        {
+            std::unique_lock<std::mutex> lock(m);
+            ++count;
+            wasExecuted.notify_all();
+        }
+
+    public:
+        virtual void updated(const User &user) override
+        {
+            incrementCountAndNotify();
+        }
+
+        void waitForCountAndFailOnTimeout(int NumberOfWorkItems, int timeoutMilliseconds = 100)
+        {
+            std::unique_lock<std::mutex> lock(m);
+            EXPECT_TRUE(wasExecuted.wait_for(
+                lock,
+                std::chrono::milliseconds(timeoutMilliseconds),
+                [this, NumberOfWorkItems]()
+                {
+                    return count == NumberOfWorkItems;
+                }));
+
+            ASSERT_EQ(count, NumberOfWorkItems);
+        }
+    };
+};
+
+TEST_F(AGeoServer_ScaleTests, HandlesLargeNumbersOfUsers)
+{
+    auto listener = std::static_pointer_cast<GeoServerScaleListener>(trackingListener);
+    server.startThreads(2);
+
+    const unsigned int lots{500000};
+    addUsersAt(lots, Location{aUserLocation.go(TenMeters, West)});
+
+    std::async([this, &listener]()
+               { server.usersInBox(aUser, Width, Height, listener); })
+        .get();
+
+    listener->waitForCountAndFailOnTimeout(lots);
 }
