@@ -6,41 +6,55 @@
 class ThreadPool
 {
     std::queue<Work> q;
-    std::unique_ptr<std::thread> workerThread = nullptr;
+    std::vector<std::thread> workerThreads;
     std::atomic<bool> done{false};
+    std::mutex m;
 
     void job()
     {
-        while (!done && hasWork())
+        while (done == false)
         {
-            pullWork().execute();
+            while (hasWork())
+            {
+                pullWork().execute();
+            }
         }
     }
 
     void stop()
     {
         done = true;
-        if (workerThread)
-            workerThread->join();
+        for (auto& workerThread : workerThreads)
+            workerThread.join();
     }
 
 public:
-    bool hasWork() { return !q.empty(); }
-    void add(Work w) { q.push(w); }
+    bool hasWork()
+    {
+        std::lock_guard<std::mutex> lock(m);
+        return !q.empty();
+    }
+    void add(Work w)
+    {
+        std::lock_guard<std::mutex> lock(m);
+        q.push(w);
+    }
+
     Work pullWork()
     {
-        Work out;
-        if (hasWork())
-        {
-            out = q.front();
-            q.pop();
-        }
+        std::lock_guard<std::mutex> lock(m);
+        if (q.empty())
+            return Work{};
+
+        Work out = q.front();
+        q.pop();
         return out;
     }
 
-    void start()
+    void start(int numberOfThreads = 1)
     {
-        workerThread = std::make_unique<std::thread>(&ThreadPool::job, this);
+        for (unsigned int i{0}; i < numberOfThreads; i++)
+            workerThreads.push_back(std::thread(&ThreadPool::job, this));
     }
 
     virtual ~ThreadPool()

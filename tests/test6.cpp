@@ -64,7 +64,7 @@ TEST_F(AWorkObject, CanBeConstructedWithAFunctionAndId)
 TEST_F(AWorkObject, ExecutesFunctionStored)
 {
     bool wasExecuted{false};
-    auto executeFunction = [&]()
+    auto executeFunction = [&wasExecuted]()
     { wasExecuted = true; };
 
     Work work(executeFunction);
@@ -79,12 +79,12 @@ TEST_F(AWorkObject, CanExecuteOnDataCapturedWithFunction)
     std::vector<std::string> data{"a", "b"};
     std::string result;
 
-    auto callbackFunction = [&](std::string s)
+    auto callbackFunction = [&result](std::string s)
     {
         result.append(s);
     };
 
-    auto executeFunction = [&]()
+    auto executeFunction = [&data, callbackFunction]()
     {
         std::stringstream s;
         s << data[0] << data[1];

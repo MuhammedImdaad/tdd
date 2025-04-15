@@ -3,6 +3,7 @@ using namespace ::testing;
 
 #include <ThreadPool.h>
 #include <chrono>
+#include <unordered_set>
 
 class AThreadPool : public ::Test
 {
@@ -11,28 +12,6 @@ public:
     std::mutex m;
 
     virtual ~AThreadPool() {};
-};
-
-class AThreadPoolExtended : public AThreadPool
-{
-    std::condition_variable wasExecuted;
-    unsigned int count{0}; // to check if work actually gets executed
-public:
-    void SetUp() { pool.start(); }
-
-    Work work{[&]
-              {
-                  std::unique_lock<std::mutex> lock(m);
-                  ++count;
-                  wasExecuted.notify_all();
-              }};
-
-    void waitForCountAndFailOnTimeout(int NumberOfWorkItems)
-    {
-        std::unique_lock<std::mutex> lock(m);
-        ASSERT_TRUE(wasExecuted.wait_for(lock, std::chrono::milliseconds(100), [&]()
-                                         { return count == NumberOfWorkItems; }));
-    }
 };
 
 TEST_F(AThreadPool, HasNoWorkOnCreation)
@@ -84,8 +63,42 @@ TEST_F(AThreadPool, HasWorkAfterWorkRemovedButWorkRemains)
     ASSERT_TRUE(pool.hasWork());
 }
 
+class AThreadPoolExtended : public AThreadPool
+{
+    std::condition_variable wasExecuted;
+    unsigned int count{0}; // to check if work actually gets executed
+
+public:
+    std::vector<std::thread> clients;
+    void SetUp() override { pool.start(); }
+    void TearDown() override
+    {
+        for (auto &client : clients)
+            client.join();
+    }
+
+    virtual ~AThreadPoolExtended() {}
+
+    void incrementCountAndNotify()
+    {
+        std::unique_lock<std::mutex> lock(m);
+        ++count;
+        wasExecuted.notify_all();
+    }
+
+    void waitForCountAndFailOnTimeout(int NumberOfWorkItems, int timeoutMilliseconds = 100)
+    {
+        std::unique_lock<std::mutex> lock(m);
+        ASSERT_TRUE(wasExecuted.wait_for(lock, std::chrono::milliseconds(timeoutMilliseconds),
+                                         [this, NumberOfWorkItems]()
+                                         { return count == NumberOfWorkItems; }));
+    }
+};
+
 TEST_F(AThreadPoolExtended, PullsWorkInAThread)
 {
+    Work work([this]()
+              { incrementCountAndNotify(); });
     unsigned int NumberOfWorkItems{1};
     pool.add(work);
     waitForCountAndFailOnTimeout(NumberOfWorkItems);
@@ -93,10 +106,67 @@ TEST_F(AThreadPoolExtended, PullsWorkInAThread)
 
 TEST_F(AThreadPoolExtended, ExecutesAllWork)
 {
-    // std::this_thread::sleep_for(std::chrono::microseconds(1));
+    Work work([this]()
+              { incrementCountAndNotify(); });
+    // std::this_thread::sleep_for(std::chrono::milliseconds(100));
     unsigned int NumberOfWorkItems{3};
 
-    for (unsigned int i{0}; i < NumberOfWorkItems; i++)
+    for (unsigned int j{0}; j < NumberOfWorkItems; j++)
         pool.add(work);
     waitForCountAndFailOnTimeout(NumberOfWorkItems);
+}
+
+TEST_F(AThreadPoolExtended, HoldsUpUnderMultiClientStress)
+{
+    Work work([this]()
+              { incrementCountAndNotify(); });
+    unsigned int NumberOfClients{30};
+    unsigned int NumberOfWorkItems{30};
+
+    for (unsigned int i{0}; i < NumberOfClients; i++)
+    {
+        clients.push_back(std::thread(
+            [NumberOfWorkItems, &work, this]()
+            {
+                for (unsigned int j{0}; j < NumberOfWorkItems; j++)
+                    pool.add(work);
+            }));
+    };
+
+    waitForCountAndFailOnTimeout(NumberOfClients * NumberOfWorkItems, 100);
+}
+
+class ARealThreadPool : public AThreadPoolExtended
+{
+    std::unordered_set<std::thread::id> s;
+
+public:
+    void SetUp() override {}
+    void addThreadIfUnique(const std::thread::id &id)
+    {
+        std::unique_lock<std::mutex> lock(m);
+        s.insert(id);
+    };
+
+    int numberOfThreadsProcessed() { return s.size(); };
+};
+
+TEST_F(ARealThreadPool, DispatchesWorkToMultipleThreads)
+{
+    int numberOfThreads{10};
+    pool.start(numberOfThreads);
+
+    Work work{
+        [this]()
+        {
+            addThreadIfUnique(std::this_thread::get_id());
+            incrementCountAndNotify();
+        }};
+
+    unsigned int NumberOfWorkItems{500};
+    for (unsigned int i{0}; i < NumberOfWorkItems; i++)
+        pool.add(work);
+
+    waitForCountAndFailOnTimeout(NumberOfWorkItems);
+    ASSERT_EQ(numberOfThreads, numberOfThreadsProcessed());
 }

@@ -16,12 +16,12 @@ public:
     {
     }
 
-    auto execute()
+    auto execute() const
     {
         func();
     }
 
-    int id()
+    int id() const
     {
         return workId;
     }
