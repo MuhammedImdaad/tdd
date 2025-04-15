@@ -124,32 +124,39 @@ public:
         }
         return result;
     }
+
+    class GeoServerUserTrackingListener : public GeoServerListner
+    {
+    public:
+        std::vector<User> trackedUsers;
+        virtual void updated(const User &user)
+        {
+            trackedUsers.push_back(user);
+        }
+    } trackingListener;
 };
 
 TEST_F(AGeoServer_UsersInBox, AnswersUsersInSpecifiedRange)
 {
     server.updateLocation(
-
         bUser, Location{aUserLocation.go(Width / 2 - TenMeters, East)});
+    server.usersInBox(aUser, Width, Height, trackingListener);
 
-    auto users = server.usersInBox(aUser, Width, Height);
-
-    ASSERT_EQ(std::vector<std::string>{bUser}, UserNames(users));
+    ASSERT_EQ(std::vector<std::string>{bUser}, UserNames(trackingListener.trackedUsers));
 }
+
 
 TEST_F(AGeoServer_UsersInBox, AnswersOnlyUsersWithinSpecifiedRange)
 {
     server.updateLocation(
-
         bUser, Location{aUserLocation.go(Width / 2 + TenMeters, East)});
 
     server.updateLocation(
-
         cUser, Location{aUserLocation.go(Width / 2 - TenMeters, East)});
 
-    auto users = server.usersInBox(aUser, Width, Height);
+    server.usersInBox(aUser, Width, Height, trackingListener);
 
-    ASSERT_EQ(std::vector<std::string>{cUser}, UserNames(users));
+    ASSERT_EQ(std::vector<std::string>{cUser}, UserNames(trackingListener.trackedUsers));
 }
 
 TEST_F(AGeoServer_UsersInBox, HandlesLargeNumbersOfUsers)
@@ -164,6 +171,6 @@ TEST_F(AGeoServer_UsersInBox, HandlesLargeNumbersOfUsers)
         server.updateLocation(user, anotherLocation);
     }
 
-    auto users = server.usersInBox(aUser, Width, Height);
-    ASSERT_EQ(lots, users.size());
+    server.usersInBox(aUser, Width, Height, trackingListener);
+    ASSERT_EQ(lots, trackingListener.trackedUsers.size());
 }

@@ -32,17 +32,21 @@ Location GeoServer::locationOf(const std::string &name) const
     return Location{};
 }
 
-std::vector<User> GeoServer::usersInBox(
-    const std::string &user, double widthInMeters, double heightInMeters) const
+void GeoServer::usersInBox(
+    const std::string &user, double widthInMeters, double heightInMeters,
+    GeoServerListner &listner) const
 {
     auto location = locationOf(user);
     Area box{location, widthInMeters, heightInMeters};
 
-    std::vector<User> tracked;
+    // std::vector<User> tracked;
     for (auto &each : users)
         if (isDifferentUserInBounds(each, user, box))
-            tracked.push_back(User{each.first, each.second});
-    return tracked;
+        {
+            // tracked.push_back(User{each.first, each.second});
+            listner.updated({each.first, each.second});
+        }
+    // return tracked;
 }
 
 bool GeoServer::isDifferentUserInBounds(

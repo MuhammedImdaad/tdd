@@ -8,6 +8,7 @@
 #include <User.h>
 #include <Area.h>
 
+class GeoServerListner;
 class GeoServer
 {
     std::map<std::string, Location> users;
@@ -19,8 +20,8 @@ public:
     Location locationOf(const std::string &name) const;
     void updateLocation(const std::string &name, const Location &location);
 
-    std::vector<User> usersInBox(
-        const std::string &user, double widthInMeters, double heightInMeters) const;
+    void usersInBox(
+        const std::string &user, double widthInMeters, double heightInMeters, GeoServerListner& ) const;
 
     bool isDifferentUserInBounds(
         const std::pair<std::string, Location> &each,
