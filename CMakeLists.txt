@@ -19,7 +19,7 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 file (GLOB sources src/*.cpp)
-set (testSources tests/test7.cpp)
+set (testSources tests/geoServerTest.cpp)
 add_executable(unitTest ${testSources} ${sources})
 
 target_include_directories(unitTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)

@@ -18,12 +18,18 @@ public:
     void stopTracking(const std::string &name);
     Location locationOf(const std::string &name) const;
     void updateLocation(const std::string &name, const Location &location);
-    
+
     std::vector<User> usersInBox(
         const std::string &user, double widthInMeters, double heightInMeters) const;
-    
-        bool isDifferentUserInBounds(
+
+    bool isDifferentUserInBounds(
         const std::pair<std::string, Location> &each,
         const std::string &user,
         const Area &box) const;
+};
+
+class GeoServerListner
+{
+public:
+    virtual void updated(const User &user) = 0;
 };
