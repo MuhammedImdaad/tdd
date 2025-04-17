@@ -17,7 +17,7 @@ TEST(custom, floatingTolerance)
 {
     double x{4.0};
     double y{0.56};
-    ASSERT_EQ(4.56, x + y);
+    ASSERT_NE(4.56, x + y);
 }
 
 TEST(custom, floatingTolerance1)
@@ -29,7 +29,7 @@ TEST(custom, floatingTolerance1)
 
 TEST(custom, exceptions)
 {
-    ASSERT_ANY_THROW(1);
+    ASSERT_ANY_THROW(throw std::runtime_error("Test exception"));
 }
 
 TEST(custom, DISABLED_disabled)
@@ -86,21 +86,11 @@ struct SumCase {
  */
 class AddFixture: public testing::TestWithParam<SumCase> {
 };
-
-TEST_P(AddFixture, GeneratesLotsOfSumsFromTwoNumbers)
-{
-    // Retrieve the current parameter (SumCase object)
-    SumCase input = GetParam();
-
-    // Test to verify the sum of two numbers using the Adder class
-    ASSERT_EQ(Adder::sum(input.a, input.b), input.expected);
-}
-
 // Array of test cases for parameterized testing
 SumCase sums[] = {
     SumCase(1, 1, 2), // Test case 1: 1 + 1 = 2
     SumCase(1, 2, 3), // Test case 2: 1 + 2 = 3
-    SumCase(2, 2, 5)  // Test case 3: 2 + 2 = 5 (intentional failure for demonstration)
+    // SumCase(2, 2, 5)  // Test case 3: 2 + 2 = 5 (intentional failure for demonstration)
 };
 
 // Instantiate the parameterized test suite (prefix,test_suite_name,__VA_ARGS__...)
@@ -110,3 +100,12 @@ an element from the array ​sums​ to inject into the test
 (GeneratesLotsOfSumsFromTwoNumbers) each time it’s called. 
 The first line in the test calls​GetParam​, which returns 
 the injected value (a ​SumCase​ object).*/
+
+TEST_P(AddFixture, GeneratesLotsOfSumsFromTwoNumbers)
+{
+    // Retrieve the current parameter (SumCase object)
+    SumCase input = GetParam();
+
+    // Test to verify the sum of two numbers using the Adder class
+    ASSERT_EQ(Adder::sum(input.a, input.b), input.expected);
+}

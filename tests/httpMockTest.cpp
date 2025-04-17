@@ -17,13 +17,9 @@ public:
 class APlaceDescriptionService : public testing::Test
 {
 public:
-    static std::string ValidLatitude;
-    static std::string ValidLongitude;
+    std::string ValidLatitude = "39.7392";
+    std::string ValidLongitude = "-104.9903";
 };
-
-// Define static members
-std::string APlaceDescriptionService::ValidLatitude = "39.7392";
-std::string APlaceDescriptionService::ValidLongitude = "-104.9903";
 
 /**********************************************************************************************/
 TEST_F(APlaceDescriptionService, HttpInitializeBeforeGet)

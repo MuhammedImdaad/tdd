@@ -51,4 +51,9 @@ public:
     {
         return radians * (180 / Pi);
     }
+
+    bool operator==(const Location& other) const
+    {
+        return m_latitude == other.m_latitude && m_longitude == other.m_longitude;
+    }
 };

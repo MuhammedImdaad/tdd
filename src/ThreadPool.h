@@ -5,65 +5,23 @@
 #include <atomic>
 #include <mutex>
 #include <iostream>
+#include <condition_variable>
 
 class ThreadPool
 {
     std::queue<Work> q;
     std::vector<std::thread> workerThreads;
+
     std::atomic<bool> done{false};
     std::mutex m;
 
-    void job()
-    {
-        while (done == false)
-        {
-            while (hasWork())
-            {
-                pullWork().execute();
-            }
-        }
-    }
-
-    void stop()
-    {
-        done = true;
-        for (auto& workerThread : workerThreads)
-            workerThread.join();
-    }
+    void job();
+    void stop();
 
 public:
-    bool hasWork()
-    {
-        std::lock_guard<std::mutex> lock(m);
-        return !q.empty();
-    }
-
-    virtual void add(Work w)
-    {
-        std::lock_guard<std::mutex> lock(m);
-        q.push(w);
-    }
-
-    Work pullWork()
-    {
-        std::lock_guard<std::mutex> lock(m);
-
-        if (q.empty())
-            return Work{};
-
-        Work out = q.front();
-        q.pop();
-        return out;
-    }
-
-    void start(int numberOfThreads = 1)
-    {
-        for (unsigned int i{0}; i < numberOfThreads; i++)
-            workerThreads.push_back(std::thread(&ThreadPool::job, this));
-    }
-
-    virtual ~ThreadPool()
-    {
-        stop();
-    }
+    bool hasWork();
+    virtual void add(Work w);
+    Work pullWork();
+    void start(int numberOfThreads = 1);
+    virtual ~ThreadPool();
 };

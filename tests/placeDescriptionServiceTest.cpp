@@ -5,26 +5,22 @@
 class APlaceDescriptionService : public testing::Test
 {
 public:
-    static std::string ValidLatitude;
-    static std::string ValidLongitude;
+    std::string ValidLatitude = "39.7392";
+    std::string ValidLongitude = "-104.9903";
 };
 
-// Define static members
-std::string APlaceDescriptionService::ValidLatitude = "39.7392";
-std::string APlaceDescriptionService::ValidLongitude = "-104.9903";
-
 // HttpStub is the type of our test double
-class HttpStub : public Http 
+class HttpStub : public Http
 {
 public:
     virtual void initialize() override {};
 
-    // a test double that returns a hard-coded value is a​ stub​. 
+    // a test double that returns a hard-coded value is a​ stub​.
     // You can similarly refer to the ​get ​method as a​ stub method​.
     std::string get(const std::string &url) const override
     {
         verify(url);
-        return returnResponse; 
+        return returnResponse;
     }
 
     void verify(const std::string &url) const
@@ -39,7 +35,7 @@ public:
 /*
     Test-driving the Place Description Service presents a challenge—
     the dependency on the REST call is problematic for at least a few reasons.
-    Making an actual HTTP call to invoke a REST service is very slow and will bog down your test run. 
+    Making an actual HTTP call to invoke a REST service is very slow and will bog down your test run.
     The service might not always be available.
     You can’t guarantee what results the call will return.
 
@@ -59,7 +55,6 @@ TEST_F(APlaceDescriptionService, ReturnsDescriptionForValidLocation)
             "country" : "US"
         }
     })";
-
 
     // PlaceDescriptionService object knows not whether it holds a production Http instance or an instance designed solely for testing
     PlaceDescriptionService service{&stub};
