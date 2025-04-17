@@ -83,6 +83,7 @@ public:
     {
         std::unique_lock<std::mutex> lock(m);
         ++count;
+        // std::cout << "incrementCountAndNotify\n";
         wasExecuted.notify_all();
     }
 

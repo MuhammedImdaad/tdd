@@ -11,8 +11,10 @@ class ThreadPool
 {
     std::queue<Work> q;
     std::vector<std::thread> workerThreads;
+    std::condition_variable workAdded;
 
-    std::atomic<bool> done{false};
+    // std::atomic<bool> done{false};
+    bool done{false};
     std::mutex m;
 
     void job();
@@ -20,6 +22,7 @@ class ThreadPool
 
 public:
     bool hasWork();
+    bool workComplete() const;
     virtual void add(Work w);
     Work pullWork();
     void start(int numberOfThreads = 1);

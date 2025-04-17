@@ -183,7 +183,7 @@ TEST_F(AGeoServer_UsersInBox, AnswersOnlyUsersWithinSpecifiedRange)
     server.usersInBox(aUser, Width, Height, trackingListener);
 }
 
-TEST_F(AGeoServer_UsersInBox, DISABLED_HandlesLargeNumbersOfUsers)
+TEST_F(AGeoServer_UsersInBox, HandlesLargeNumbersOfUsersSTMock)
 {
     auto trackingListener = std::make_shared<GeoServerMockListner>();
     server.startThreads(0);
@@ -254,10 +254,24 @@ public:
     }
 };
 
-TEST_F(AGeoServer_ScaleTests, HandlesLargeNumbersOfUsers)
+TEST_F(AGeoServer_ScaleTests, HandlesLargeNumbersOfUsersMTMock)
+{
+    auto trackingListener = std::make_shared<GeoServerMockListner>();
+    server.startThreads(5);
+
+    const unsigned int lots{500000};
+    addUsersAt(lots, Location{aUserLocation.go(TenMeters, West)});
+
+    EXPECT_CALL(*trackingListener, updated(_)).Times(lots);
+    std::async([this, &trackingListener]()
+               { server.usersInBox(aUser, Width, Height, trackingListener); })
+        .get();
+}
+
+TEST_F(AGeoServer_ScaleTests, HandlesLargeNumbersOfUsersMTReal)
 {
     auto trackingListener = std::make_shared<GeoServerScaleListener>();
-    server.startThreads(2);
+    server.startThreads(5);
 
     const unsigned int lots{500000};
     addUsersAt(lots, Location{aUserLocation.go(TenMeters, West)});
