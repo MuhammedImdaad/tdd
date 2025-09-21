@@ -9,15 +9,15 @@ few core concepts around test-driving threads.
 
 Consistent failure when dealing with threads is a great step toward a solution.
 
-TEST_F(AThreadPoolExtended, PullsWorkInAThread)
-Thread 140600223839808 started
-140600223844160 Work added to queue
-140600223844160 Notified worker threads
-140600223839808 Thread waiting...1
-140600223839808 pulling out 1
-140600223839808 pulled out
-140600223839808 Executing work...
-140600223839808 Thread waiting...0
-140600223844160 Notified worker threads to stop
-140600223839808 Thread exiting...
-140600223844160 going off
+    TEST_F(AThreadPoolExtended, PullsWorkInAThread)
+    Thread 808 started
+    160 Work added to queue
+    160 Notified worker threads
+    808 Thread waiting...1
+    808 pulling out 1
+    808 pulled out
+    808 Executing work...
+    808 Thread waiting...0
+    160 Notified worker threads to stop
+    808 Thread exiting...
+    160 going off

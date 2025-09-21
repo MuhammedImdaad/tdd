@@ -5,6 +5,7 @@ using namespace ::testing;
 #include <chrono>
 #include <unordered_set>
 
+// [----------] 6 tests from AThreadPool
 class AThreadPool : public ::Test
 {
 public:
@@ -63,6 +64,7 @@ TEST_F(AThreadPool, HasWorkAfterWorkRemovedButWorkRemains)
     ASSERT_TRUE(pool.hasWork());
 }
 
+// [----------] 3 tests from AThreadPoolExtended
 class AThreadPoolExtended : public AThreadPool
 {
     std::condition_variable wasExecuted;
@@ -137,6 +139,7 @@ TEST_F(AThreadPoolExtended, HoldsUpUnderMultiClientStress)
     waitForCountAndFailOnTimeout(NumberOfClients * NumberOfWorkItems, 100);
 }
 
+// [----------] 1 test from ARealThreadPool
 class ARealThreadPool : public AThreadPoolExtended
 {
     std::unordered_set<std::thread::id> s;

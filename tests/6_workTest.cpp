@@ -3,6 +3,7 @@ using namespace ::testing;
 
 #include <Work.h>
 
+// [----------] 8 tests from AWorkObject
 class AWorkObject : public Test
 {
 };

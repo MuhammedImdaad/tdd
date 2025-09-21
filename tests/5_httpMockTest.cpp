@@ -1,4 +1,3 @@
-
 #include <gmock/gmock.h> // Google Mock framework for mocking dependencies
 #include <Http.h> // Interface for HTTP operations
 #include <PlaceDescriptionService.h> // Service to format place descriptions
@@ -9,7 +8,7 @@ using ::testing::NiceMock;
 using ::testing::Return;
 
 
-// Mock class for Http interface using Google Mock
+// Mock class for Http INTERFACE using Google Mock
 class HttpMock : public Http
 {
 public:
@@ -19,7 +18,7 @@ public:
     MOCK_METHOD(std::string, get, (const std::string &url), (override, const));
 };
 
-
+// [----------] 4 tests from APlaceDescriptionService
 // Test fixture for PlaceDescriptionService tests
 class APlaceDescriptionService : public testing::Test
 {

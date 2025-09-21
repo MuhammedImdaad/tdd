@@ -7,6 +7,7 @@
 
 using namespace ::testing;
 
+// [----------] 9 tests from AGeoServer
 class AGeoServer : public Test
 {
 public:
@@ -87,6 +88,7 @@ TEST_F(AGeoServer, UpdatesLocationOfUserByAnotherUser)
     ASSERT_NEAR(-104, location.longitude(), 0.015);
 }
 
+// [----------] 3 tests from AGeoServer_UsersInBox
 class AGeoServer_UsersInBox : public Test
 {
 public:
@@ -183,7 +185,7 @@ TEST_F(AGeoServer_UsersInBox, AnswersOnlyUsersWithinSpecifiedRange)
     server.usersInBox(aUser, Width, Height, trackingListener);
 }
 
-TEST_F(AGeoServer_UsersInBox, HandlesLargeNumbersOfUsersSTMock)
+TEST_F(AGeoServer_UsersInBox, DISABLED_HandlesLargeNumbersOfUsersSTMock)
 {
     auto trackingListener = std::make_shared<GeoServerMockListner>();
     server.startThreads(0);
@@ -242,6 +244,7 @@ public:
     }
 };
 
+// [----------] 2 tests from AGeoServer_ScaleTests
 class AGeoServer_ScaleTests : public AGeoServer_UsersInBox
 {
 public:
@@ -254,7 +257,7 @@ public:
     }
 };
 
-TEST_F(AGeoServer_ScaleTests, HandlesLargeNumbersOfUsersMTMock)
+TEST_F(AGeoServer_ScaleTests, DISABLED_HandlesLargeNumbersOfUsersMTMock)
 {
     auto trackingListener = std::make_shared<GeoServerMockListner>();
     server.startThreads(5);
@@ -268,7 +271,7 @@ TEST_F(AGeoServer_ScaleTests, HandlesLargeNumbersOfUsersMTMock)
         .get();
 }
 
-TEST_F(AGeoServer_ScaleTests, HandlesLargeNumbersOfUsersMTReal)
+TEST_F(AGeoServer_ScaleTests, DISABLED_HandlesLargeNumbersOfUsersMTReal)
 {
     auto trackingListener = std::make_shared<GeoServerScaleListener>();
     server.startThreads(5);

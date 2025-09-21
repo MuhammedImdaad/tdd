@@ -12,6 +12,8 @@ public:
     Soundex soundex;
 };
 
+// [----------] 12 tests from SoundexEncoding
+
 TEST_F(SoundexEncoding, RetainsSoleLetterOfOneLetterWord) // test case name followed by test within the test case
 {
     ASSERT_EQ(soundex.encode("A"), "A000");

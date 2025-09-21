@@ -13,6 +13,7 @@ class Fixture : public testing::Test
     };
 };
 
+// [----------] 4 tests from custom
 TEST(custom, floatingTolerance)
 {
     double x{4.0};
@@ -32,11 +33,8 @@ TEST(custom, exceptions)
     ASSERT_ANY_THROW(throw std::runtime_error("Test exception"));
 }
 
+// [ DISABLED ] custom.DISABLED_disabled
 TEST(custom, DISABLED_disabled)
-{
-}
-
-TEST_F(Fixture, withSetup)
 {
 }
 
@@ -45,7 +43,7 @@ TEST_F(Fixture, withSetup)
  */
 class Adder
 {
-    public:
+public:
     /**
      * @brief Computes the sum of two integers.
      * @param a First integer.
@@ -64,27 +62,40 @@ TEST(custom, GeneratesASumFromTwoNumbers)
     ASSERT_EQ(Adder::sum(1, 1), 2);
 }
 
+TEST_F(Fixture, withSetup)
+{/*
+    [----------] 1 test from Fixture
+    [ RUN      ] Fixture.withSetup
+    ------------------------ Local Setup -------------------------
+    ------------------------ Local TearDown -------------------------
+    [       OK ] Fixture.withSetup (0 ms)
+    [----------] 1 test from Fixture (0 ms total)
+*/}
+
+
 /**
  * @brief Represents a test case for summing two integers.
- * designed to capture two input numbers and an expected sum. 
+ * designed to capture two input numbers and an expected sum.
  */
-struct SumCase {
-   int a, b, expected;
+struct SumCase
+{
+    int a, b, expected;
 
-   /**
-    * @brief Constructs a SumCase object.
-    * @param anA First integer.
-    * @param aB Second integer.
-    * @param anExpected Expected result of the sum.
-    */
-   SumCase(int anA, int aB, int anExpected)
-      : a(anA), b(aB), expected(anExpected) {}
+    /**
+     * @brief Constructs a SumCase object.
+     * @param anA First integer.
+     * @param aB Second integer.
+     * @param anExpected Expected result of the sum.
+     */
+    SumCase(int anA, int aB, int anExpected)
+        : a(anA), b(aB), expected(anExpected) {}
 };
 
 /**
  * @brief Parameterized test class for testing the Adder class with multiple inputs.
  */
-class AddFixture: public testing::TestWithParam<SumCase> {
+class AddFixture : public testing::TestWithParam<SumCase>
+{
 };
 // Array of test cases for parameterized testing
 SumCase sums[] = {
@@ -93,12 +104,13 @@ SumCase sums[] = {
     // SumCase(2, 2, 5)  // Test case 3: 2 + 2 = 5 (intentional failure for demonstration)
 };
 
+// [----------] 2 tests from BulkTest/AddFixture
 // Instantiate the parameterized test suite (prefix,test_suite_name,__VA_ARGS__...)
 INSTANTIATE_TEST_SUITE_P(BulkTest, AddFixture, testing::ValuesIn(sums));
-/* The ​ValuesIn ​function indicates that the injection process should use 
-an element from the array ​sums​ to inject into the test 
-(GeneratesLotsOfSumsFromTwoNumbers) each time it’s called. 
-The first line in the test calls​GetParam​, which returns 
+/* The ​ValuesIn ​function indicates that the injection process should use
+an element from the array ​sums​ to inject into the test
+(GeneratesLotsOfSumsFromTwoNumbers) each time it’s called.
+The first line in the test calls​GetParam​, which returns
 the injected value (a ​SumCase​ object).*/
 
 TEST_P(AddFixture, GeneratesLotsOfSumsFromTwoNumbers)
